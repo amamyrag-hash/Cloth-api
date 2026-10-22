@@ -12,7 +12,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         return Order::where('user_id', $request->user()->id)
-            ->with('items.product')
+            ->with('item.product')
             ->latest()
             ->get();
     }

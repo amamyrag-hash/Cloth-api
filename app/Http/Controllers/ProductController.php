@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
@@ -13,17 +15,39 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json([
-            'products'=>ProductResource::collection(Product::with('category')->paginate())
-        ]);
+        //return response()->json([
+          //  'products'=>ProductResource::collection(Product::with('category')->paginate())
+        //]);
+
+        $query= Product::with('category');
+         if($request->filled('search')){
+            $query->where('name' , 'like' , '%' . $request->search .'%');
+         }
+         if($request->filled('category_id')){
+            $query->where('category_id', $request->category_id);
+         }
+         if($request->filled('max_price')){
+            $query->where('price', '<=' , $request->max_price);
+         }
+         if($request->filled('min_price')){
+            $query->where('price', '>=' , $request->min_price);
+         }
+         if($request->sort === 'price_asc'){
+            $query->orderBy('price');
+         }elseif ($request->sort === 'price_desc'){
+            $query->orderByDesc('price');
+         }else{
+            $query->latest();
+         }
+         return $query->paginate(10)->withQueryString();
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductRequest $request)
+    public function store(StoreProductRequest $request)
     {
         $product= Product::create($request->validated());
 
@@ -45,18 +69,10 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $data=$request->validate([
-           'category_id'=>'require|exists:categories,id',
-            'name'=>'require|string|max:255',
-            'slug'=>'require|string|max:255|unique:products,slug' . $product->id,
-            'description'=>'nullable|string',
-            'price'=>'require|numeric|min::0',
-            'stock'=>'intger|min:0',
-            'image'=>'nullable|string'
-        ]);
-        $product->update($data);
+        
+        $product->update($request->validated());
 
         return response()->json([
             'product'=>new ProductResource($product->load('category'))
