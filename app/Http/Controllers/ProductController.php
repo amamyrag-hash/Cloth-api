@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductIndexRequest;
 use App\Http\Requests\ProductRequest;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
@@ -15,7 +16,8 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    //
+    public function index(ProductIndexRequest $request)
     {
         //return response()->json([
           //  'products'=>ProductResource::collection(Product::with('category')->paginate())
@@ -53,7 +55,7 @@ class ProductController extends Controller
 
         return response()->json([
             'product'=>new ProductResource($product)
-        ]);
+        ] , 201);
     }
 
     /**

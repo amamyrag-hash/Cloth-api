@@ -58,6 +58,7 @@ class ProductApiTest extends TestCase
 
     public function test_admin_can_create_product(): void//تست ساخت محصول توسط ادمین
     {
+        $this->withoutExceptionHandling();
         Sanctum::actingAs(User::factory()->create(['role' => 'admin']));
         $category = $this->category();
 
